@@ -1,9 +1,9 @@
 from market import app, db
 from flask import render_template
 from market.models import Item, User
-from market.forms import RegisterForm, LoginForm
-from flask import redirect, url_for, flash, get_flashed_messages
-from flask_login import login_user, logout_user, login_required
+from market.forms import RegisterForm, LoginForm, PurchaseItemForm
+from flask import redirect, url_for, flash, request
+from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 
 
@@ -11,11 +11,25 @@ from sqlalchemy.exc import IntegrityError
 def home():
     return render_template('index.html')
 
-@app.route('/market')
+@app.route('/market', methods=['GET','POST'])
 @login_required
 def market_page():
-    items = Item.query.all()
-    return render_template('market.html', items=items)
+    purchase_form = PurchaseItemForm()
+    if request.method == "POST":
+        purchase_item = request.form.get('purchased_item')
+        purchase_item_object = Item.query.filter_by(name = purchase_item).first()
+        if purchase_item_object:
+            if current_user.can_purchase(purchase_item_object):
+                purchase_item_object.buy(current_user)
+                flash(f"Item { purchase_item_object.name } purchased for { purchase_item_object.price }", category='success')
+            else:
+                flash(f"You're too broke to buy this", category='danger')
+
+        return redirect(url_for('market_page'))
+    
+    if request.method == 'GET':
+        items = Item.query.filter_by(owner=None)
+        return render_template('market.html', items=items, purchase_from=purchase_form)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register_page():
