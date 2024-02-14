@@ -5,8 +5,14 @@
 {% endblock %}
 
 {% block content %}
-  
-  <table class="table table-dark table-striped-columns">
+
+
+  <div class="row" style="margin-top: 20px; margin-left:20px">
+    <div class="col-8">
+      <h3>Available items on the market</h3>
+      <p>Click on itesm to purchase</p>
+      <br>
+  <table class="table table-light table-striped-columns">
     <thead>
       <tr>
         <th scope="col">ID</th>
@@ -19,18 +25,26 @@
     <tbody>
 
       {% for item in items %}
+      {% include 'includes/items_modals.html' %}
         <tr>
           <th scope="row">{{ item.id }}</th>
           <td>{{ item.name }}</td>
           <td>{{ item.barcode }}</td>
           <td>Rs. {{ item.price }}</td>
           <td >
-            <button type="button" class="btn btn-info">More Info</button>
-            <button type="button" class="btn btn-success">Purchase</button>
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#Modal-MoreInfo-{{ item.id }}">More Info</button>
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#Modal-PurchaseConfirm-{{ item.id }}">Purchase</button>
           </td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
+    </div>
+    <div class="col-4">
+      <h3>Owned Items</h3>
+      <p>Click on item to put it back on the market</p>
+      <br>
+    </div>
+  </div>
 
 {% endblock %}
